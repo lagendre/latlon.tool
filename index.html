@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TWD67、TWD97、WGS84坐標轉換</title>
+
+  	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script language="javascript">
+         //defs
+        proj4.defs([
+            [
+                'EPSG:4326',
+                '+title=WGS84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees'],
+            [
+                'EPSG:3826',
+                '+title=TWD97 TM2 +proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +units=m +no_defs'
+            ],
+            [
+                'EPSG:3828',
+                '+title=TWD67 TM2 +proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=aust_SA +towgs84=-752,-358,-179,-0.0000011698,0.0000018398,0.0000009822,0.00002329 +units=m +no_defs'
+            ]
+        ]);
+        //EPSG
+        let EPSG3826 = new proj4.Proj('EPSG:3826'); //TWD97 TM2(121分帶)
+        let EPSG3828 = new proj4.Proj('EPSG:3828'); //TWD67 TM2(121分帶)
+        let EPSG4326 = new proj4.Proj('EPSG:4326'); //WGS84
+        
+        $(document).ready(function(){
+ 				 $("#transform").click(function(){
+
+                    let twd67, twd97,latlon,keyin;
+            		if (($("#lon").val()!=="")&&($("#lat").val()!=="")){
+                    keyin=[ parseFloat($("#lon").val()), parseFloat($("#lat").val())];
+                    twd97 = proj4(EPSG4326, EPSG3826, keyin);
+                    twd67 = proj4(EPSG4326, EPSG3828, keyin);
+                    
+        			$( "#97x" ).val(twd97[0].toFixed(3));
+                     $( "#97y" ).val(twd97[1].toFixed(3));
+                     $( "#67x" ).val(twd67[0].toFixed(3));
+							  $( "#67y" ).val(twd67[1].toFixed(3));
+                     
+                     latlon = [$("#lat").val(),$("#lon").val()];
+                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
+                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
+
+                    }
+                   else if (($("#97x").val()!=="")&&($("#97y").val()!=="")){
+        				   keyin=[ parseFloat( $( "#97x" ).val()) , parseFloat( $( "#97y" ).val() )];
+                     twd67 = proj4(EPSG3826, EPSG3828, keyin);
+                    latlon = proj4(EPSG3826, EPSG4326, keyin);
+                   
+                     $( "#67x" ).val(twd67[0].toFixed(3));
+							  $( "#67y" ).val(twd67[1].toFixed(3));
+                     $("#lon").val(latlon[0].toFixed(7));
+                     $("#lat").val(latlon[1].toFixed(7));
+                       
+                     //sort by latlong google map
+                     latlon =[latlon[1],latlon[0]];
+                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
+                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
+                   }
+                   else{
+								keyin=[ parseFloat( $( "#67x" ).val()) , parseFloat( $( "#67y" ).val() )];
+                     twd97 = proj4( EPSG3828, EPSG3826, keyin );
+                    latlon = proj4( EPSG3828, EPSG4326, keyin );
+
+                     $( "#97x" ).val(twd97[0].toFixed(3));
+							  $( "#97y" ).val(twd97[1].toFixed(3));
+                     $("#lon").val(latlon[0].toFixed(7));
+                     $("#lat").val(latlon[1].toFixed(7));
+                     //sort by latlong google map
+                     latlon =[latlon[1],latlon[0]];
+                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
+                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
+                   }
+				});
+			});
+      </script>
+
+<body>
+
+	<div class="container text-center">
+
+       <div class="row">
+        <div class="col">
+         <h2>請輸入轉換的原始坐標(Taiwan Only)</h2>
+        </div>
+      </div>
+        <div class="row">
+         <h4>WGS84</h4>
+        <div class="col">
+           <label for="lon" class="form-label">經度(longitude)</label>
+  				<input type="search" class="form-control" id="lon" placeholder="120.9914451">
+        </div>
+        <div class="col">
+          <label for="lat" class="form-label">緯度(latitude)</label>
+  				<input type="search" class="form-control" id="lat" placeholder="24.1898">
+         </div>
+		</div>
+      
+       <div class="row">
+         <h4>TWD97</h4>
+        <div class="col">
+           <label for="97x" class="form-label">X</label>
+  				<input type="search" class="form-control" id="97x" placeholder="249131">
+        </div>
+        <div class="col">
+           <label for="97y" class="form-label">Y</label>
+  				<input type="search" class="form-control" id="97y" placeholder="2676043">
+        </div>
+       </div>
+			<div class="row">
+         <h4>TWD67</h4>
+        <div class="col">
+           <label for="67x" class="form-label">X</label>
+  				<input type="search" class="form-control" id="67x" placeholder="248302">
+        </div>
+        <div class="col">
+           <label for="67y" class="form-label">Y</label>
+  				<input type="search" class="form-control" id="67y" placeholder="2676248">
+        </div>
+       </div>
+
+      <button type="button" class="btn btn-primary btn-lg" id="transform">轉換</button>
+
+  		<div class="row" style="text-align: center">
+        <div class="col">
+          <a href="https://www.openstreetmap.org/search?query=24.18978970369035,120.9914451163409" target="_blank" id="openMap">Open Street Map定位</a>
+        </div>
+         <div class="col">
+          <a href="https://maps.google.com/?q=24.18978970369035,120.9914451163409" target="_blank" id="googleMap">Google Map定位</a>
+        </div>
+      </div>
+  </div>
+
+</body>
+</html>
