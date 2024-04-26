@@ -129,7 +129,7 @@
              
              $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
                $("#elevation").val(data["elevation"]);
-               let reportTxt = `位置回報\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min}\nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)}\n高度: ${data["elevation"]} M\n\n`;
+               let reportTxt = `位置回報 %0D%0A\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min} %0D%0A\nxx組 全員狀況良好(學員x人 教練x人) %0D%0A\n休息xx分鐘 %0D%0A\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} %0D%0A\n高度: ${data["elevation"]} M\n\n`;
                $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
                
                $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?url=${googlemap.concat(latlon)}&text=${reportTxt}` );
@@ -254,6 +254,7 @@
 </div>
 
 		<button type="button" class="btn btn-primary btn-lg" id="getloc">現在位置</button>
+      <button type="button" class="btn btn-primary btn-lg" id="elevate">取得高度</button>
       <button type="reset" class="btn btn-primary btn-lg" id="reset">清除</button>
 
   		<div class="row" style="text-align: center">
@@ -266,7 +267,7 @@
       </div>
       <div class="mb-3">
   <label for="reportTextarea" class="form-label">中搜回報範例</label>
-       <a href="https://social-plugins.line.me/lineit/share?url=your_url&text=your_text" class="line-it-button"><img src="./line.jpg" ></a>
+       <a href="https://social-plugins.line.me/lineit/share?url=your_url&text=your_text" class="line-it-button"><img src="https://img.pcstore.com.tw/store_ad/eccoupon/title_03.jpg" ></a>
   <textarea class="form-control" id="reportTextarea" rows="8"></textarea>
 </div>
   </form>
