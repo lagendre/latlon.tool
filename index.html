@@ -10,6 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <style type="text/css">
+    .line-it-button:link { text-decoration: none; }
+    .line-it-button:visited { text-decoration: none; }
+    .line-it-button:hover { text-decoration: none; }
+    .line-it-button:active { text-decoration: none; }
+    .line-it-button>img{outline-style: none};
+  </style>
     <script language="javascript">
          //defs
         proj4.defs([
@@ -29,77 +36,184 @@
         let EPSG3826 = new proj4.Proj('EPSG:3826'); //TWD97 TM2(121分帶)
         let EPSG3828 = new proj4.Proj('EPSG:3828'); //TWD67 TM2(121分帶)
         let EPSG4326 = new proj4.Proj('EPSG:4326'); //WGS84
-        
+      
+       const openmap="https://www.openstreetmap.org/search?query=";
+       const googlemap ="http://maps.google.com/?q=";
+      
         $(document).ready(function(){
- 				 $("#transform").click(function(){
+          
+          var twd67, twd97,latlon,keyin;
+          
+          $( ".loc" ).on( "keyup", function( e ) {
+   					
+            	keyupf( Array.from( $(this).attr('id') )[0] );
+            
+          } ); //end keyup
 
-                    let twd67, twd97,latlon,keyin;
-            		if (($("#lon").val()!=="")&&($("#lat").val()!=="")){
-                    keyin=[ parseFloat($("#lon").val()), parseFloat($("#lat").val())];
-                    twd97 = proj4(EPSG4326, EPSG3826, keyin);
-                    twd67 = proj4(EPSG4326, EPSG3828, keyin);
-                    
-        			$( "#97x" ).val(twd97[0].toFixed(3));
-                     $( "#97y" ).val(twd97[1].toFixed(3));
-                     $( "#67x" ).val(twd67[0].toFixed(3));
-							  $( "#67y" ).val(twd67[1].toFixed(3));
-                     
-                     latlon = [$("#lat").val(),$("#lon").val()];
-                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
-                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
-
-                    }
-                   else if (($("#97x").val()!=="")&&($("#97y").val()!=="")){
-        				   keyin=[ parseFloat( $( "#97x" ).val()) , parseFloat( $( "#97y" ).val() )];
-                     twd67 = proj4(EPSG3826, EPSG3828, keyin);
-                    latlon = proj4(EPSG3826, EPSG4326, keyin);
+          function keyupf(xTriggered) {
+            switch (xTriggered) {
+              case '9':
+                   twd97 = keyin=[ parseFloat( $( "#97x" ).val()) , parseFloat( $( "#97y" ).val() )];
+                   twd67 = proj4(EPSG3826, EPSG3828, keyin);
+                  	latlon = proj4(EPSG3826, EPSG4326, keyin);
                    
-                     $( "#67x" ).val(twd67[0].toFixed(3));
-							  $( "#67y" ).val(twd67[1].toFixed(3));
-                     $("#lon").val(latlon[0].toFixed(7));
-                     $("#lat").val(latlon[1].toFixed(7));
-                       
-                     //sort by latlong google map
-                     latlon =[latlon[1],latlon[0]];
-                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
-                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
-                   }
-                   else{
-								keyin=[ parseFloat( $( "#67x" ).val()) , parseFloat( $( "#67y" ).val() )];
-                     twd97 = proj4( EPSG3828, EPSG3826, keyin );
-                    latlon = proj4( EPSG3828, EPSG4326, keyin );
+                   $( "#67x" ).val(twd67[0].toFixed(3));
+							$( "#67y" ).val(twd67[1].toFixed(3));
 
-                     $( "#97x" ).val(twd97[0].toFixed(3));
-							  $( "#97y" ).val(twd97[1].toFixed(3));
-                     $("#lon").val(latlon[0].toFixed(7));
-                     $("#lat").val(latlon[1].toFixed(7));
-                     //sort by latlong google map
-                     latlon =[latlon[1],latlon[0]];
-                     $("#openMap").attr("href", "https://www.openstreetmap.org/search?query="+latlon );
-                     $("#googleMap").attr("href", "https://maps.google.com/?q="+latlon );
-                   }
-				});
+              case '6':
+                if(xTriggered==='6'){
+                	keyin=[ parseFloat( $( "#67x" ).val()) , parseFloat( $( "#67y" ).val() )];
+                  twd97 = proj4( EPSG3828, EPSG3826, keyin );
+                  latlon = proj4( EPSG3828, EPSG4326, keyin );
+
+                   $( "#97x" ).val(twd97[0].toFixed(3));
+							$( "#97y" ).val(twd97[1].toFixed(3));
+                }
+                   $("#lon").val(latlon[0].toFixed(7));
+                   $("#lat").val(latlon[1].toFixed(7));
+               case 'l':
+                  let dmslon = ConvertDDToDMS( parseFloat($("#lon").val()) );
+                  let dmslat = ConvertDDToDMS( parseFloat($("#lat").val()) );
+                  $("#dmslonD").val(dmslon.deg);
+                  $("#dmslonM").val(dmslon.min);
+                  $("#dmslonS").val(dmslon.sec);
+                  $("#dmslatD").val(dmslat.deg);
+                  $("#dmslatM").val(dmslat.min);
+                  $("#dmslatS").val(dmslat.sec);
+            		if(xTriggered==='6'||xTriggered==='9'){
+                      break;
+                    }
+              case 'd':
+                if(xTriggered==='d'){
+                  $("#lon").val( ConvertDMSToDD( parseFloat($("#dmslonD").val()) , parseFloat($("#dmslonM").val()) , parseFloat($("#dmslonS").val()) ));
+                     $("#lat").val( ConvertDMSToDD( parseFloat($("#dmslatD").val()) , parseFloat($("#dmslatM").val()) , parseFloat($("#dmslatS").val()) ));
+                
+                 }
+                
+                keyin=[ parseFloat($("#lon").val()), parseFloat($("#lat").val())];
+                twd97 = proj4(EPSG4326, EPSG3826, keyin);
+                twd67 = proj4(EPSG4326, EPSG3828, keyin);
+                    
+        			 $( "#97x" ).val(twd97[0].toFixed(3));
+                $( "#97y" ).val(twd97[1].toFixed(3));
+                $( "#67x" ).val(twd67[0].toFixed(3));
+						$( "#67y" ).val(twd67[1].toFixed(3));
+                break;
+              default:
+                console.log(xTriggered);
+            }
+              //sort by latlong google map
+                latlon = [$("#lat").val(),$("#lon").val()];
+                $("#openMap").attr("href", openmap.concat(latlon) );
+                $("#googleMap").attr("href", googlemap.concat(latlon) );
+            
+            //time format
+            let months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+				  let days = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
+					let d = new Date();
+					let day = days[d.getDay()];
+					let hr = d.getHours();
+					let min = d.getMinutes();
+					if (min < 10) {
+    					min = "0" + min;
+					}
+				let ampm = "早上";
+				if( hr > 12 ) {
+    				hr -= 12;
+    				ampm = "下午";
+				}
+				let date = d.getDate();
+				let month = months[d.getMonth()];
+				let year = d.getFullYear();
+           
+             
+             $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
+               $("#elevation").val(data["elevation"]);
+               let reportTxt = `位置回報\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min}\nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)}\n高度: ${data["elevation"]} M\n\n`;
+               $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
+               
+               $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?url=${googlemap.concat(latlon)}&text=${reportTxt}` );
+             }); //end getjson
+        }
+           $("#getloc").click(function(){
+              if (navigator.geolocation) {
+    					navigator.geolocation.getCurrentPosition(showPosition);
+  					} else {
+    					alert( "Geolocation is not supported by this browser.");
+  					}
+             });
+          function showPosition(position) {
+                $("#lon").val( position.coords.latitude.toFixed(7) );
+                $("#lat").val( position.coords.longitude.toFixed(7) );
+            	  
+            		keyupf("l");
+         	 }		      
 			});
+			
+      function ConvertDMSToDD(degrees, minutes, seconds,) {
+          return (degrees + minutes/60 + seconds/(60*60)).toFixed(7) ;
+
+      }
+      function ConvertDDToDMS(D) {
+        return {
+          deg: 0 | (D < 0 ? (D = -D) : D),
+          min: 0 | (((D += 1e-9) % 1) * 60),
+          sec: (0 | (((D * 60) % 1) * 6000)) / 100,
+        };
+      }
+	  /*
+	石門山 
+	24°08'46.4"N 121°17'03.1"E
+	WGS84：24.14622, 121.28419
+	TWD97：278881.261, 2671246.027
+	TWD67：278052.472, 2671451.933
+	  */
       </script>
 
 <body>
 
-	<div class="container text-center">
+	<form class="container text-center">
 
        <div class="row">
         <div class="col">
          <h2>請輸入轉換的原始坐標(Taiwan Only)</h2>
         </div>
       </div>
+       <h4>WGS84</h4>
+      <div class="row g-3">
+        <div class="col-auto">
+          <label for="dmslonD" class="form-label">經度(度)</label>
+  				<input type="number" class="form-control loc" id="dmslonD" placeholder="120">
+        </div>
+        <div class="col-auto">
+          <label for="dmslonM" class="form-label">經度(分)</label>
+          <input type="number" class="form-control loc" id="dmslonM" placeholder="59">
+        </div>
+        <div class="col-auto">
+           <label for="dmslonS" class="form-label">經度(秒)</label>
+          <input type="number" class="form-control loc" id="dmslonS" placeholder="29.2">
+        </div>
+         <div class="col-auto">
+          <label for="dmslatD" class="form-label">緯度(度)</label>
+  				<input type="number" class="form-control loc" id="dmslatD" placeholder="24" >
+        </div>
+        <div class="col-auto">
+          <label for="dmslatM" class="form-label">緯度(分)</label>
+          <input type="number" class="form-control loc" id="dmslatM" placeholder="11">
+        </div>
+        <div class="col-auto">
+           <label for="dmslatS" class="form-label">緯度(秒)</label>
+          <input type="number" class="form-control loc" id="dmslatS" placeholder="120.9914451">
+        </div>
+      </div>
         <div class="row">
-         <h4>WGS84</h4>
         <div class="col">
-           <label for="lon" class="form-label">經度(longitude)</label>
-  				<input type="search" class="form-control" id="lon" placeholder="120.9914451">
+           <label for="lon" class="form-label">經度(lon)</label>
+  				<input type="number" class="form-control loc" id="lon" placeholder="120.9914451">
         </div>
         <div class="col">
-          <label for="lat" class="form-label">緯度(latitude)</label>
-  				<input type="search" class="form-control" id="lat" placeholder="24.1898">
+          <label for="lat" class="form-label">緯度(lat)</label>
+  				<input type="number" class="form-control loc" id="lat" placeholder="24.1898">
          </div>
 		</div>
       
@@ -107,36 +221,56 @@
          <h4>TWD97</h4>
         <div class="col">
            <label for="97x" class="form-label">X</label>
-  				<input type="search" class="form-control" id="97x" placeholder="249131">
+  				<input type="number" class="form-control loc" id="97x" placeholder="249131">
         </div>
         <div class="col">
            <label for="97y" class="form-label">Y</label>
-  				<input type="search" class="form-control" id="97y" placeholder="2676043">
+  				<input type="number" class="form-control loc" id="97y" placeholder="2676043">
         </div>
        </div>
 			<div class="row">
          <h4>TWD67</h4>
         <div class="col">
            <label for="67x" class="form-label">X</label>
-  				<input type="search" class="form-control" id="67x" placeholder="248302">
+  				<input type="number" class="form-control loc" id="67x" placeholder="248302">
         </div>
         <div class="col">
            <label for="67y" class="form-label">Y</label>
-  				<input type="search" class="form-control" id="67y" placeholder="2676248">
+  				<input type="number" class="form-control loc" id="67y" placeholder="2676248">
         </div>
        </div>
+      <div class="row g-3 align-items-center">
+  <div class="col">
+     <label for="elevation" class="form-label">高度</label>
+  </div>
+  <div class="col">
+    <input type="search" class="form-control" id="elevation"  readonly>
+  </div>
+  <div class="col-auto">
+    <span  class="form-text">
+      公尺(M)
+    </span>
+  </div>
+</div>
 
-      <button type="button" class="btn btn-primary btn-lg" id="transform">轉換</button>
+		<button type="button" class="btn btn-primary btn-lg" id="getloc">現在位置</button>
+      <button type="button" class="btn btn-primary btn-lg" id="elevate">取得高度</button>
+      <button type="reset" class="btn btn-primary btn-lg" id="reset">清除</button>
 
   		<div class="row" style="text-align: center">
         <div class="col">
-          <a href="https://www.openstreetmap.org/search?query=24.18978970369035,120.9914451163409" target="_blank" id="openMap">Open Street Map定位</a>
+          <a href="https://www.openstreetmap.org/" target="_blank" id="openMap">Open Street Map定位</a>
         </div>
          <div class="col">
-          <a href="https://maps.google.com/?q=24.18978970369035,120.9914451163409" target="_blank" id="googleMap">Google Map定位</a>
+          <a href="https://maps.google.com/" target="_blank" id="googleMap">Google Map定位</a>
         </div>
       </div>
-  </div>
+      <div class="mb-3">
+  <label for="reportTextarea" class="form-label">中搜回報範例</label>
+       <a href="https://social-plugins.line.me/lineit/share?url=your_url&text=your_text" class="line-it-button"><img src="./line.jpg" ></a>
+  <textarea class="form-control" id="reportTextarea" rows="8"></textarea>
+</div>
+  </form>
 
 </body>
 </html>
