@@ -51,11 +51,13 @@
           } ); //end keyup
 
          $(".line-it-button").click(function(){
+
            let  reportTxt = $("#reportTextarea").val();
   				reportTxt.replace( "\n", "%0D%0A" );
-				
-           $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(reportTxt)}` );
-           console.log(reportTxt);
+				$(".line-it-button").attr("href", `http://line.me/R/msg/text/?${encodeURIComponent(reportTxt)}` );
+           
+          // $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(reportTxt)}` );
+           //console.log(reportTxt);
 			});
           
           function keyupf(xTriggered) {
