@@ -50,6 +50,12 @@
             
           } ); //end keyup
 
+         $(".line-it-button").click(function(){
+           let  reportTxt = $("#reportTextarea").val();
+  				reportTxt.replace( "\n", "%0D%0A" );
+           $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?text=${reportTxt}` );
+			});
+          
           function keyupf(xTriggered) {
             switch (xTriggered) {
               case '9':
@@ -129,10 +135,9 @@
              
              $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
                $("#elevation").val(data["elevation"]);
-               let reportTxt = `位置回報 %0D%0A\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min} %0D%0A\nxx組 全員狀況良好(學員x人 教練x人) %0D%0A\n休息xx分鐘 %0D%0A\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} %0D%0A\n高度: ${data["elevation"]} M\n\n`;
+               let reportTxt = `位置回報\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min} \nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} \n高度: ${data["elevation"]} M\n\n`;
                $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
-               
-               $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?url=${googlemap.concat(latlon)}&text=${reportTxt}` );
+              
              }); //end getjson
         }
            $("#getloc").click(function(){
@@ -180,33 +185,35 @@
         </div>
       </div>
        <h4>WGS84</h4>
-      <div class="row g-3">
-        <div class="col-auto">
+      <div class="row">
+        <div class="col">
           <label for="dmslonD" class="form-label">經度(度)</label>
   				<input type="number" class="form-control loc" id="dmslonD" placeholder="120">
         </div>
-        <div class="col-auto">
+        <div class="col">
           <label for="dmslonM" class="form-label">經度(分)</label>
           <input type="number" class="form-control loc" id="dmslonM" placeholder="59">
         </div>
-        <div class="col-auto">
+        <div class="col">
            <label for="dmslonS" class="form-label">經度(秒)</label>
           <input type="number" class="form-control loc" id="dmslonS" placeholder="29.2">
         </div>
-         <div class="col-auto">
+      </div>
+      <div class="row">
+         <div class="col">
           <label for="dmslatD" class="form-label">緯度(度)</label>
   				<input type="number" class="form-control loc" id="dmslatD" placeholder="24" >
         </div>
-        <div class="col-auto">
+        <div class="col">
           <label for="dmslatM" class="form-label">緯度(分)</label>
           <input type="number" class="form-control loc" id="dmslatM" placeholder="11">
         </div>
-        <div class="col-auto">
+        <div class="col">
            <label for="dmslatS" class="form-label">緯度(秒)</label>
-          <input type="number" class="form-control loc" id="dmslatS" placeholder="120.9914451">
+          <input type="number" class="form-control loc" id="dmslatS" placeholder="51">
         </div>
       </div>
-        <div class="row">
+       <div class="row">
         <div class="col">
            <label for="lon" class="form-label">經度(lon)</label>
   				<input type="number" class="form-control loc" id="lon" placeholder="120.9914451">
@@ -244,9 +251,9 @@
      <label for="elevation" class="form-label">高度</label>
   </div>
   <div class="col">
-    <input type="search" class="form-control" id="elevation"  readonly>
+    <input type="search" class="form-control" id="elevation" placeholder="3952" readonly>
   </div>
-  <div class="col-auto">
+  <div class="col">
     <span  class="form-text">
       公尺(M)
     </span>
@@ -254,7 +261,6 @@
 </div>
 
 		<button type="button" class="btn btn-primary btn-lg" id="getloc">現在位置</button>
-      <button type="button" class="btn btn-primary btn-lg" id="elevate">取得高度</button>
       <button type="reset" class="btn btn-primary btn-lg" id="reset">清除</button>
 
   		<div class="row" style="text-align: center">
@@ -267,7 +273,7 @@
       </div>
       <div class="mb-3">
   <label for="reportTextarea" class="form-label">中搜回報範例</label>
-       <a href="https://social-plugins.line.me/lineit/share?url=your_url&text=your_text" class="line-it-button"><img src="./line.jpg" ></a>
+       <a href="#" class="line-it-button"><img src="./line.jpg" ></a>
   <textarea class="form-control" id="reportTextarea" rows="8"></textarea>
 </div>
   </form>
