@@ -1,21 +1,325 @@
 <!DOCTYPE html>
-<html lang="zh-tw">
+<html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>TWD67、TWD97、WGS84坐標轉換</title>
-
-  	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  	  	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-  <style type="text/css">
+  <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+  	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style type="text/css">
     .line-it-button:link { text-decoration: none; }
     .line-it-button:visited { text-decoration: none; }
     .line-it-button:hover { text-decoration: none; }
     .line-it-button:active { text-decoration: none; }
     .line-it-button>img{outline-style: none};
+    .row{text-align: center};
+
+
+#background-container {
+    height: 100vh;
+    width: 100%;
+}
+
+.form-control.webcam-start{
+    position: relative;
+    background: black;
+    opacity: 0.8;
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    text-shadow: 1px 1px #000;
+    font-size: 1.2rem;
+    width: 350px;
+    height: 55px;
+    z-index: 9999;
+    top: 45%;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.form-control.webcam-on {
+  position: fixed;
+  top: 12vh;
+  bottom: auto;
+  left: 0px;
+  right: auto;
+  transition: all 100ms;
+  width: 145px!important;
+}
+.form-control.webcam-off {
+    transition: all 100ms;
+}
+  
+
+  .form-switch {
+    display: inline-block;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .form-switch i {
+    position: relative;
+    display: inline-block;
+    margin-right: .5rem;
+    width: 60px;
+    height: 30px;
+    background-color: #e6e6e6;
+    border-radius: 25px;
+    vertical-align: text-bottom;
+    transition: all 0.3s linear;
+  }
+  
+  .form-switch i::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 56px;
+    height: 25px;
+    background-color: #fff;
+    border-radius: 15px;
+    transform: translate3d(2px, 2px, 0) scale3d(1, 1, 1);
+    transition: all 0.25s linear;
+  }
+  
+  .form-switch i::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    background-color: #fff;
+    border: 1px solid grey;
+    border-radius: 15px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+    transform: translate3d(2px, 2px, 0);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .form-switch:active i::after {
+    width: 60px;
+    transform: translate3d(2px, 2px, 0);
+  }
+  
+  .form-switch:active input:checked + i::after { transform: translate3d(16px, 2px, 0); }
+  
+  .form-switch input { display: none; }
+  
+  .form-switch input:checked + i { background-color: #4BD763; }
+  
+  .form-switch input:checked + i::before { transform: translate3d(18px, 2px, 0) scale3d(0, 0, 0); }
+  
+  .form-switch input:checked + i::after { transform: translate3d(30px, 2px, 0); }
+
+  .form-switch input:disabled + i { background-color: #eeeeee; cursor: not-allowed; }
+
+  .form-switch input:disabled + i::after {
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.10);
+  }
+
+
+  .app-panel{
+    height: 100vh;
+    width: 100%;
+    text-align: center;
+   // background-color: black;
+  }
+
+  #webcam{
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 999;
+    pointer-events: none;
+    margin: 0 auto;
+  }
+
+  .md-modal {
+    margin: auto;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2000;
+      visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      -moz-backface-visibility: hidden;
+      backface-visibility: hidden;
+  }
+  
+  .md-show {
+      visibility: visible;
+  }
+  
+  .md-overlay {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      opacity: 0;
+      background: rgba(#e4f0e3, 0.8);
+      -webkit-transition: all 0.3s;
+      -moz-transition: all 0.3s;
+      transition: all 0.3s;
+  }
+  
+  .md-show ~ .md-overlay {
+      opacity: 1;
+      visibility: visible;
+  }
+  
+  .md-effect-12 .md-content {
+      -webkit-transform: scale(0.8);
+      -moz-transform: scale(0.8);
+      -ms-transform: scale(0.8);
+      transform: scale(0.8);
+      opacity: 0;
+      -webkit-transition: all 0.3s;
+      -moz-transition: all 0.3s;
+      transition: all 0.3s;
+  }
+  
+  .md-show.md-effect-12 ~ .md-overlay {
+      background-color: #e4f0e3;
+  } 
+  
+  .md-effect-12 .md-content h3,
+  .md-effect-12 .md-content {
+      background: transparent;
+  }
+  
+  .md-show.md-effect-12 .md-content {
+      -webkit-transform: scale(1);
+      -moz-transform: scale(1);
+      -ms-transform: scale(1);
+      transform: scale(1);
+      opacity: 1;
+  }
+
+ #errorMsg {
+     position: fixed;
+     top: 22vh;
+     left: 0;
+     padding: 20px;
+     z-index: 999999;
+ }
+
+
+
+.cameraControls {
+  position: absolute;
+  bottom: 10vh;
+  width: 100%;
+  z-index: 99999;
+  background: transparent;
+  opacity: 0.7;
+  padding: 10px;
+}
+
+
+.material-icons{
+  width: 100px;
+  font-size: 50px !important;
+  color: white;
+  width: 80px;
+  height: 80px;
+  background-color: black;
+  border-radius: 50%;
+  padding-top: 15px;
+  margin: 0 10px;
+}
+
+.flash{ 
+  position:fixed; 
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color:#fff;
+  z-index: 999999;
+}
+
+#canvas{
+  background-color: transparent;
+  position: absolute;
+  z-index: 9999;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  /*-moz-transform: scale(-1, 1);
+-webkit-transform: scale(-1, 1);
+-o-transform: scale(-1, 1);
+transform: scale(-1, 1);
+filter: FlipH;*/
+}
+
+@media screen and (max-width: 480px) {
+  .form-control.webcam-start{
+    width: 300px;
+  }
+
+  #webcam{
+    position: absolute;
+    width: auto;
+    height: 100vh;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .cameraControls {
+    bottom: 25vh;
+  }
+}
+
+@media screen and (min-width: 420px) and (max-width: 767px) {
+  .form-control.webcam-on {
+    top: 17vh;
+    left: 0;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .webcam-container {
+      background-attachment: fixed;
+  }
+
+  #errorMsg {
+    position: fixed;
+    top: 32vh;
+    left: 20vw;
+    padding: 20px;
+    z-index: 999999;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .form-control.webcam-on {
+    top: 16vh;
+    left: 8vw;
+  }
+}
+
   </style>
     <script language="javascript">
          //defs
@@ -36,46 +340,33 @@
         let EPSG3826 = new proj4.Proj('EPSG:3826'); //TWD97 TM2(121分帶)
         let EPSG3828 = new proj4.Proj('EPSG:3828'); //TWD67 TM2(121分帶)
         let EPSG4326 = new proj4.Proj('EPSG:4326'); //WGS84
-      
        const openmap="https://www.openstreetmap.org/search?query=";
        const googlemap ="http://maps.google.com/?q=";
-      
         $(document).ready(function(){
-          
           var twd67, twd97,latlon,keyin;
-          
           $( ".loc" ).on( "keyup", function( e ) {
-   					
-            	keyupf( Array.from( $(this).attr('id') )[0] );
-            
-          } ); //end keyup
-
+            keyupf( Array.from( $(this).attr('id') )[0] );
+          }); //end keyup
          $(".line-it-button").click(function(){
-
            let  reportTxt = $("#reportTextarea").val();
   				reportTxt.replace( "\n", "%0D%0A" );
 				$(".line-it-button").attr("href", `http://line.me/R/msg/text/?${encodeURIComponent(reportTxt)}` );
-           
           // $(".line-it-button").attr("href", `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(reportTxt)}` );
            //console.log(reportTxt);
 			});
-          
           function keyupf(xTriggered) {
             switch (xTriggered) {
               case '9':
                    twd97 = keyin=[ parseFloat( $( "#97x" ).val()) , parseFloat( $( "#97y" ).val() )];
                    twd67 = proj4(EPSG3826, EPSG3828, keyin);
                   	latlon = proj4(EPSG3826, EPSG4326, keyin);
-                   
                    $( "#67x" ).val(twd67[0].toFixed(3));
 							$( "#67y" ).val(twd67[1].toFixed(3));
-
               case '6':
                 if(xTriggered==='6'){
                 	keyin=[ parseFloat( $( "#67x" ).val()) , parseFloat( $( "#67y" ).val() )];
                   twd97 = proj4( EPSG3828, EPSG3826, keyin );
                   latlon = proj4( EPSG3828, EPSG4326, keyin );
-
                    $( "#97x" ).val(twd97[0].toFixed(3));
 							$( "#97y" ).val(twd97[1].toFixed(3));
                 }
@@ -97,13 +388,10 @@
                 if(xTriggered==='d'){
                   $("#lon").val( ConvertDMSToDD( parseFloat($("#dmslonD").val()) , parseFloat($("#dmslonM").val()) , parseFloat($("#dmslonS").val()) ));
                      $("#lat").val( ConvertDMSToDD( parseFloat($("#dmslatD").val()) , parseFloat($("#dmslatM").val()) , parseFloat($("#dmslatS").val()) ));
-                
                  }
-                
                 keyin=[ parseFloat($("#lon").val()), parseFloat($("#lat").val())];
                 twd97 = proj4(EPSG4326, EPSG3826, keyin);
                 twd67 = proj4(EPSG4326, EPSG3828, keyin);
-                    
         			 $( "#97x" ).val(twd97[0].toFixed(3));
                 $( "#97y" ).val(twd97[1].toFixed(3));
                 $( "#67x" ).val(twd67[0].toFixed(3));
@@ -116,8 +404,37 @@
                 latlon = [$("#lat").val(),$("#lon").val()];
                 $("#openMap").attr("href", openmap.concat(latlon) );
                 $("#googleMap").attr("href", googlemap.concat(latlon) );
-            
-            //time format
+          
+             $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
+               $("#elevation").val(data["elevation"]);
+              
+               let reportTxt = `位置回報\n${getDateTime()}\nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} \n高度: ${data["elevation"]} M\n\n`;
+               $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
+             }); //end getjson
+        }
+           $("#getloc").click(function(){
+              if (navigator.geolocation) {
+    					navigator.geolocation.getCurrentPosition(showPosition);
+  					} else {
+    					alert( "Geolocation is not supported by this browser.");
+  					}
+             }); //end of geoloation
+          function showPosition(position) {
+                $("#lon").val( position.coords.longitude.toFixed(7) );
+                $("#lat").val( position.coords.latitude.toFixed(7) );
+            		keyupf("l");
+         	 }		  
+           function ConvertDMSToDD(degrees, minutes, seconds,) {
+            return (degrees + minutes/60 + seconds/(60*60)).toFixed(7) ;
+              }
+          function ConvertDDToDMS(D) {
+            return {
+              deg: 0 | (D < 0 ? (D = -D) : D),
+              min: 0 | (((D += 1e-9) % 1) * 60),
+              sec: (0 | (((D * 60) % 1) * 6000)) / 100,
+            };}
+               function getDateTime(){
+                //time format
             let months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 				  let days = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
 					let d = new Date();
@@ -135,41 +452,141 @@
 				let date = d.getDate();
 				let month = months[d.getMonth()];
 				let year = d.getFullYear();
-           
-             
-             $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
-               $("#elevation").val(data["elevation"]);
-               let reportTxt = `位置回報\n${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min} \nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} \n高度: ${data["elevation"]} M\n\n`;
-               $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
-              
-             }); //end getjson
-        }
-           $("#getloc").click(function(){
-              if (navigator.geolocation) {
-    					navigator.geolocation.getCurrentPosition(showPosition);
-  					} else {
-    					alert( "Geolocation is not supported by this browser.");
-  					}
-             });
-          function showPosition(position) {
-                $("#lon").val( position.coords.longitude.toFixed(7) );
-                $("#lat").val( position.coords.latitude.toFixed(7) );
-            	  
-            		keyupf("l");
-         	 }		      
-			});
-			
-      function ConvertDMSToDD(degrees, minutes, seconds,) {
-          return (degrees + minutes/60 + seconds/(60*60)).toFixed(7) ;
+              return `${year}/${month}/${date}${day}  ${ampm} ${hr}: ${min}`;
+            }
+const webcamElement = document.getElementById('webcam');
+const canvasElement = document.getElementById('canvas');
+//const snapSoundElement = document.getElementById('snapSound');
+const webcam = new Webcam(webcamElement, 'environment', canvasElement);
+let hideElement = true;
+$("#openTakePhoto").click(function () {
+        $('.md-modal').addClass('md-show');
+ 			
+        webcam.start()
+            .then(result =>{
+               cameraStarted();
+          			webcam.flip();
+               //console.log("webcam started");
+            })
+            .catch(err => {
+                displayError();
+            });
+ 			
+});
+/*$('#cameraFlip').click(function() {
+    webcam.flip();
+    webcam.start();  
+});*/
+$('#closeError').click(function() {
+    //$("#webcam-switch").prop('checked', false).change();
+});
+$("#take-photo").click(function () {
+  
+  
+    beforeTakePhoto();
+     webcam.snap(); //let picture = webcam.snap();
+ 
+ const context = canvasElement.getContext('2d')
 
-      }
-      function ConvertDDToDMS(D) {
-        return {
-          deg: 0 | (D < 0 ? (D = -D) : D),
-          min: 0 | (((D += 1e-9) % 1) * 60),
-          sec: (0 | (((D * 60) % 1) * 6000)) / 100,
-        };
-      }
+context.font = "bold 24px verdana, sans-serif ";
+//var welcomeMessage = "位置回報 WGS84";
+context.fillStyle = "#ff0000"; 
+  context.textBaseline = "top";
+  context.fillText('位置回報', 10, 10);
+  context.fillText(`${getDateTime()}`, 10, 40);
+  context.fillText(`TWD97：${$( "#97x" ).val()}, ${$( "#97y" ).val()}`, 10, 70);
+	context.fillText(`高度：${$( "#elevation" ).val()}`, 10, 100);
+    document.querySelector('#download-photo').href = canvasElement.toDataURL();//picture;
+    afterTakePhoto();
+  
+
+
+});
+$("#resume-camera").click(function () {
+    webcam.stream()
+        .then(facingMode =>{
+            removeCapture();
+        });
+});
+$("#closeTakePhoto").click(function () {
+    cameraStopped();
+    webcam.stop();
+    //console.log("webcam stopped");  
+  	removeCapture();
+});
+function displayError(err = ''){
+    if(err!=''){
+        $("#errorMsg").html(err);
+    }
+    $("#errorMsg").removeClass("d-none");
+}
+function cameraStarted(){
+    $("#errorMsg").addClass("d-none");
+    $('.flash').hide();
+    $("#webcam-caption").html("on");
+    $("#webcam-control").removeClass("webcam-off");
+    $("#webcam-control").addClass("webcam-on");
+    $(".webcam-container").removeClass("d-none");
+    if( webcam.webcamList.length > 1){
+        $("#cameraFlip").removeClass('d-none');
+    }
+    if(hideElement){
+        $("#wpfront-scroll-top-container").addClass("d-none");
+        $(".sd-sharing-enabled").addClass("d-none d-lg-block");
+        $(".floatingchat-container-wrap-mobi").addClass("d-none");
+    }
+    window.scrollTo(0, 0); 
+    $('body').css('overflow-y','hidden');
+}
+function cameraStopped(doScroll = false, appName = "webcam-app"){
+    $("#errorMsg").addClass("d-none");
+    $("#webcam-control").removeClass("webcam-on");
+    $("#webcam-control").addClass("webcam-off");
+    $("#cameraFlip").addClass('d-none');
+    $(".webcam-container").addClass("d-none");
+    $("#webcam-caption").html("Click to Start Camera");
+    $('.md-modal').removeClass('md-show');
+    if(hideElement){
+        $("#wpfront-scroll-top-container").removeClass("d-none");
+        $(".sd-sharing-enabled").removeClass("d-none d-lg-block");
+        $(".floatingchat-container-wrap-mobi").removeClass("d-none");
+    }
+    if(doScroll){
+        $('body').css('overflow-y','scroll');
+        $([document.documentElement, document.body]).animate({
+            scrollTop: ($("#"+appName).offset().top - 80)
+    }, 1000);    }
+}
+function beforeTakePhoto(){
+    $('.flash')
+        .show() 
+        .animate({opacity: 0.3}, 500) 
+        .fadeOut(500)
+        .css({'opacity': 0.7});
+    window.scrollTo(0, 0); 
+    $('#webcam-control').addClass('d-none');
+    $('#cameraControls').addClass('d-none');
+}
+function afterTakePhoto(){
+    webcam.stop();
+    $('#canvas').removeClass('d-none');
+    $('#take-photo').addClass('d-none');
+    $('#exit-app').removeClass('d-none');
+    $('#download-photo').removeClass('d-none');
+    $('#resume-camera').removeClass('d-none');
+    $('#cameraControls').removeClass('d-none');
+}
+function removeCapture(){
+    $('#canvas').addClass('d-none');
+    $('#webcam-control').removeClass('d-none');
+    $('#cameraControls').removeClass('d-none');
+    $('#take-photo').removeClass('d-none');
+    $('#exit-app').addClass('d-none');
+    $('#download-photo').addClass('d-none');
+    $('#resume-camera').addClass('d-none');
+}
+			});//end document ready
+//https://github.com/bensonruan/webcam-easy/tree/master/demo
 	  /*
 	石門山 
 	24°08'46.4"N 121°17'03.1"E
@@ -178,7 +595,6 @@
 	TWD67：278052.472, 2671451.933
 	  */
       </script>
-
 <body>
 
 	<form class="container text-center">
@@ -265,9 +681,13 @@
 </div>
 
 		<button type="button" class="btn btn-primary btn-lg" id="getloc">現在位置</button>
+      <!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#photoModal" id="openTakePhoto">
+  拍照
+</button>
       <button type="reset" class="btn btn-primary btn-lg" id="reset">清除</button>
 
-  		<div class="row" style="text-align: center">
+  		<div class="row" >
         <div class="col">
           <a href="https://www.openstreetmap.org/" target="_blank" id="openMap">Open Street Map定位</a>
         </div>
@@ -279,6 +699,41 @@
   <label for="reportTextarea" class="form-label">中搜回報範例</label>
        <a href="#" class="line-it-button"><img src="./line.jpg" ></a>
   <textarea class="form-control" id="reportTextarea" rows="8" ></textarea>
+		</div>
+      
+      <!-- Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="photoModalLabel">拍照中...</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeTakePhoto"></button>
+      </div>
+      <div class="modal-body">
+      
+            <div id="app-panel" class="app-panel md-content row p-0 m-0">     
+                <div id="webcam-container" class="webcam-container col-12 d-none p-0 m-0">
+                    <video id="webcam" autoplay playsinline ></video>
+                    <canvas id="canvas" class="d-none"></canvas>
+                    <div class="flash"></div>
+                  
+                </div>
+                <div id="cameraControls" class="cameraControls">
+                    <!--a href="#" id="cameraFlip" title="flip camera" ><i class="material-icons">
+flip_camera_ios
+</i></a-->
+                    <a href="#" id="take-photo" title="Take Photo"><i class="material-icons">camera_alt</i></a>
+                    <a href="#" id="download-photo" download="selfie.png" target="_blank" title="Save Photo" class="d-none"><i class="material-icons">file_download</i></a>  
+                    <a href="#" id="resume-camera"  title="Resume Camera" class="d-none"><i class="material-icons">camera_front</i></a>
+                </div>
+            </div>        
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" >Line Share</button>
+      </div>
+    </div>
+  </div>
 </div>
   </form>
 
