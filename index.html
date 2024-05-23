@@ -408,7 +408,7 @@ filter: FlipH;*/
              $.getJSON( "https://api.open-meteo.com/v1/elevation?latitude="+latlon[0]+"&longitude="+latlon[1], function( data ) {
                $("#elevation").val(data["elevation"]);
               
-               let reportTxt = `位置回報\n${getDateTime()}\nxx組 全員狀況良好(學員x人 教練x人)\n休息xx分鐘\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} \n高度: ${data["elevation"]} M\n\n`;
+               let reportTxt = `位置回報\n${getDateTime()}\n${$("#group").val()} ${$("#member").val()}\n全員狀況良好\n${$("#thing").val()}\nTWD97: ${twd97[0].toFixed(0)},  ${twd97[1].toFixed(0)} \n高度: ${data["elevation"]} M\n\n`;
                $("#reportTextarea").val( reportTxt + googlemap.concat(latlon));
              }); //end getjson
         }
@@ -473,13 +473,7 @@ $("#openTakePhoto").click(function () {
             });
  			
 });
-/*$('#cameraFlip').click(function() {
-    webcam.flip();
-    webcam.start();  
-});*/
-$('#closeError').click(function() {
-    //$("#webcam-switch").prop('checked', false).change();
-});
+
 $("#take-photo").click(function () {
   
   
@@ -586,14 +580,7 @@ function removeCapture(){
     $('#resume-camera').addClass('d-none');
 }
 			});//end document ready
-//https://github.com/bensonruan/webcam-easy/tree/master/demo
-	  /*
-	石門山 
-	24°08'46.4"N 121°17'03.1"E
-	WGS84：24.14622, 121.28419
-	TWD97：278881.261, 2671246.027
-	TWD67：278052.472, 2671451.933
-	  */
+
       </script>
 <body>
 
@@ -698,6 +685,20 @@ function removeCapture(){
       <div class="mb-3">
   <label for="reportTextarea" class="form-label">中搜回報範例</label>
        <a href="#" class="line-it-button"><img src="./line.jpg" ></a>
+              <div class="row">
+        <div class="col">
+          <label for="group" class="form-label">組</label>
+  				<input type="search" class="form-control" id="group" value="什麼組">
+        </div>
+        <div class="col">
+          <label for="member" class="form-label">人員</label>
+          <input type="search" class="form-control" id="member" value="學員8人 教練2人">
+        </div>
+        <div class="col">
+           <label for="thing" class="form-label">做啥事</label>
+          <input type="search" class="form-control" id="thing" value="午飯30分鐘">
+        </div>
+      </div>
   <textarea class="form-control" id="reportTextarea" rows="8" ></textarea>
 		</div>
       
